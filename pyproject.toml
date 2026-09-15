@@ -1,0 +1,40 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "rendimiento_bachoco"
+version = "0.0.1"
+description = "Proyecto dedicado al proyecto de la materia de Ingenieria de Caracteristicas en la maestria de Ciencia de Datos."
+authors = [
+  { name = "IngCar" },
+]
+
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    
+]
+dependencies = [
+    "loguru",
+    "pip",
+    "python-dotenv",
+    "ruff",
+    "tqdm",
+    "typer",
+]
+requires-python = "~=3.12.0"
+
+
+[tool.ruff]
+line-length = 99
+src = ["rendimiento_bachoco"]
+include = ["pyproject.toml", "rendimiento_bachoco/**/*.py"]
+
+[tool.ruff.lint]
+extend-select = ["I"]  # Add import sorting
+
+[tool.ruff.lint.isort]
+known-first-party = ["rendimiento_bachoco"]
+force-sort-within-sections = true
+
