@@ -1,10 +1,52 @@
-# RendimientoBachoco
-
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
+
+# Rendimiento bursátil de Gruma
 Proyecto dedicado al proyecto de la materia de Ingenieria de Caracteristicas en la maestria de Ciencia de Datos.
+
+> Estado: propuesta preliminar sujeta a validación de disponibilidad y calidad de los datos.
+
+## Problemática
+El *maíz* constituye uno de los principales insumos utilizados en la elaboración de harina de maíz y también de las *tortillas*. Tener variaciones de sus precios pueden representar cambios en los costos y en las condiciones del mercado en el que participa la empresa **Gruma**.
+
+Los precios del maíz representan variacioens temporales y regionales entre los diferentes mercados mayoristas del país. En este proyecto, se busca integrar estos datos con el compartamiento histórico de las acciones de Gruma. 
+
+## Pregunta de investigación
+¿Qué relación tuvieron las variaciones de los precios regionales del maíz en México con los rendimientos mensuales de las acciones de Gruma en la Bolsa Mexicana de Valores entre 2013 y 2025?
+
+Esta investigación tiene un alcance descriptivo y exploratorio, por lo cual los hallazgos no se interpretaran como causales.
+
+## Fuentes de datos preliminares
+
+### Bolsa Mexicana de Valores y Yahoo Finance
+
+Se utilizarán para consultar y validar los precios históricos de las acciones Serie B de Gruma. La clave de cotización es `GRUMA B` en la Bolsa Mexicana de Valores y `GRUMAB.MX` en Yahoo Finance.
+
+- Bolsa Mexicana de Valores: https://www.bmv.com.mx/es/emisoras/perfil/-5454
+- Yahoo Finance: https://finance.yahoo.com/quote/GRUMAB.MX/
+
+### Sistema Nacional de Información e Integración de Mercados
+
+El SNIIM, perteneciente a la Secretaría de Economía, publica precios del maíz en mercados mayoristas de distintas ciudades y estados de México.
+
+- https://www.economia-sniim.gob.mx/analisis/Precios.asp
+
+Esta fuente contiene información temporal, cuantitativa, cualitativa y geográfica, como fecha, mercado, ciudad, estado, variedad, presentación y precio.
+
+### Fuente complementaria: DGSIAP
+
+Como posible fuente complementaria se evaluarán los datos abiertos de producción de maíz por estado y municipio.
+
+- https://nube.agricultura.gob.mx/datosAbiertos/Agricola.php
+
+## Tipos de datos
+
+- **Series de tiempo:** precios de la acción y precios del maíz.
+- **Datos geográficos:** mercados, ciudades, estados y municipios.
+- **Datos cuantitativos:** precios, volúmenes y rendimientos bursátiles.
+- **Datos cualitativos:** producto, variedad, presentación y mercado.
 
 ## Project Organization
 
