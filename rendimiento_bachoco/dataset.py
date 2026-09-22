@@ -46,8 +46,6 @@ def download_inegi_metadata(
         stateList = json.load(fp)['CODE']
         for s in stateList:
             stateDict[s['value']] = s['Description']
-        # for i in range(0, len(stateList)):
-        #     stateDict[stateList[i]['value']] = stateList[i]['Description']
 
     # Delete 'Otros estados', 'Extranjero' and 'No especificada'
     del stateDict['35']
@@ -65,10 +63,9 @@ def download_inegi_data(
         for sCode in stateDict.keys():
 
             dest_dir = data_root / 'INEGI' / indicator
-            # if not dest_dir.exists():
+
             Path.mkdir(dest_dir, parents = True, exist_ok = True)
 
-            # TODO: Replace API key
             src = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR/' + indicator + '/es/' + sCode + '/false/BISE/2.0/' + INEGI_API_KEY + '?type=json'
             dst_file = sCode + '.json'
 
