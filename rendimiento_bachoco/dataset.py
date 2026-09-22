@@ -71,8 +71,16 @@ def download_inegi_data(
             src = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR/' + indicator + '/es/' + sCode + '/false/BISE/2.0/' + INEGI_API_KEY + '?type=json'
             dst_file = sCode + '.json'
 
-            if not Path(dst_file).exists():
-                urllib.request.urlretrieve(src, dest_dir / dst_file)
+            try:
+                if not Path(dst_file).exists():
+                    urllib.request.urlretrieve(src, dest_dir / dst_file)
+
+            except urllib.error.HTTPError as e:
+                if e.code == 400:
+                    logger.error(f'Got error: {e}. Make sure your indicator has state-by-state information. Skipping indicator.')
+                    break
+                
+
 
 @app.command()
 def main() -> None:
@@ -89,7 +97,7 @@ def main() -> None:
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
-            indicators = ['6207095719','6207095692','6207131412'],
+            indicators = ['6207131412'],#'6207095719','6207095692'],
             stateDict = download_inegi_metadata()
         )
         # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
