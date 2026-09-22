@@ -6,7 +6,7 @@ from tqdm import tqdm
 import typer
 import yfinance as yf
 
-from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INEGI_API_KEY
 import urllib.request
 import json
 
@@ -32,7 +32,7 @@ def download_finance_data(
 
 
 def download_inegi_metadata(
-        state_dict_url: str = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/7ac527c0-67a7-88ce-0a48-9a473a8c44f0?type=json'
+        state_dict_url: str = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/' + str(INEGI_API_KEY) + '?type=json'
 ):
     state_dict_dst = RAW_DATA_DIR / 'MX_state_dict.json'
 
@@ -69,7 +69,7 @@ def download_inegi_data(
             Path.mkdir(dest_dir, parents = True, exist_ok = True)
 
             # TODO: Replace API key
-            src = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR/' + indicator + '/es/' + sCode + '/false/BISE/2.0/7ac527c0-67a7-88ce-0a48-9a473a8c44f0?type=json'
+            src = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR/' + indicator + '/es/' + sCode + '/false/BISE/2.0/' + INEGI_API_KEY + '?type=json'
             dst_file = sCode + '.json'
 
             if not Path(dst_file).exists():
