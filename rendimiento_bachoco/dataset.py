@@ -54,6 +54,8 @@ def download_inegi_metadata(
 
     return stateDict
 
+
+# Done like this because INEGI API does not authorize batch calls, and still, it closes the connection. 
 def download_inegi_data(
         data_root : Path,
         indicators: List[str],
@@ -87,7 +89,7 @@ def main() -> None:
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
-            indicators = ['6207095719'],
+            indicators = ['6207095719','6207095692','6207131412'],
             stateDict = download_inegi_metadata()
         )
         # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
