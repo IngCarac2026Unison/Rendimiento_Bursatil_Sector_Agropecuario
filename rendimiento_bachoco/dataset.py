@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Callable
 
+
+from datetime import datetime, timezone
+
 from loguru import logger
 from tqdm import tqdm
 import typer
@@ -61,6 +64,22 @@ def download_sniim_data(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_bytes(response.content)
+    metadata = (
+        "Fuente: Sistema Nacional de Información e Integración de Mercados (SNIIM)\n"
+        f"URL de consulta: {url}\n"
+        f"URL de respuesta: {response.url}\n"
+        f"Fecha de descarga (UTC): {datetime.now(timezone.utc).isoformat()}\n"
+        f"Mercado: {market_name}\n"
+        f"Código del mercado: {market_code}\n"
+        "Producto: Maíz blanco (OMABLAN)\n"
+        "Unidad: Pesos mexicanos por kilogramo\n"
+        "Frecuencia: Promedios mensuales\n"
+        "Contenido: Tabla histórica original en formato HTML, sin filtrar años.\n"
+        "Origen: Procedencia del producto; distinto de la ubicación del mercado.\n"
+        "Valores faltantes: Las celdas vacías no representan precios de cero.\n"
+        f"Archivo de datos: {output_path.name}\n"
+    )
+    output_path.with_suffix(".txt").write_text(metadata, encoding="utf-8")
 
     logger.success(f"Tabla SNIIM guardada en: {output_path}")
 
