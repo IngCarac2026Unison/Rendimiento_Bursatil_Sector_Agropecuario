@@ -14,7 +14,7 @@ app = typer.Typer()
 def download_finance_data(
     output_path: Path,
     ticker: str = "GRUMAB.MX",
-    period: str = "1mo",
+    period: str = "max",
 ) -> None:
     """
     Download the data from YAHOO Finance and save it to the output path.
