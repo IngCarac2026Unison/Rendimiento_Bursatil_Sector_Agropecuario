@@ -31,11 +31,10 @@ def download_finance_data(
     logger.success(f"YAHOO Finance data downloaded successfully: {output_path}")
 
 
-def download_inegi_metadata(
-        state_dict_url: str = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/' + str(INEGI_API_KEY) + '?type=json'
-):
+def get_state_dict():
+    
+    state_dict_url: str = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/' + str(INEGI_API_KEY) + '?type=json'
     state_dict_dst = RAW_DATA_DIR / 'MX_state_dict.json'
-
 
     if not state_dict_dst.exists():
         urllib.request.urlretrieve(state_dict_url, state_dict_dst)
@@ -54,13 +53,37 @@ def download_inegi_metadata(
 
     return stateDict
 
+def download_inegi_metadata(
+        data_root : Path,
+        indicators: List[str] = []
+):
+    
+    for indicator in indicators:
+        src = 'https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_INDICATOR/' + indicator + '/es/BISE/2.0/' + str(INEGI_API_KEY) + '?type=json'
+        dst_dir = Path(RAW_DATA_DIR / 'INEGI' / 'METADATA')
+        if not dst_dir.exists():
+            Path.mkdir(dst_dir, parents = True, exist_ok = True)
 
-# Done like this because INEGI API does not authorize batch calls, and still, it closes the connection. 
+        dst_file = dst_dir / (indicator + '.json')
+        try:
+            if not dst_file.exists():
+                urllib.request.urlretrieve(src, dst_file)
+
+        except urllib.error.HTTPError as e:
+            logger.error(e)
+
+
+    pass
+
+
+# Done like this because INEGI API does not authorize batch calls.
 def download_inegi_data(
         data_root : Path,
-        indicators: List[str],
-        stateDict: dict
+        indicators: List[str]
 ):
+      
+    stateDict: dict = get_state_dict()
+
     for indicator in indicators:
         for sCode in stateDict.keys():
 
@@ -75,7 +98,8 @@ def download_inegi_data(
                 if not Path(dst_file).exists():
                     urllib.request.urlretrieve(src, dest_dir / dst_file)
 
-            except urllib.error.HTTPError as e:
+            #TODO: To avoid this error, check from the metadata description if an indicator is at the state-level or at the country level by regexing 'por entidad federativa'
+            except urllib.error.HTTPError as e: 
                 if e.code == 400:
                     logger.error(f'Got error: {e}. Make sure your indicator has state-by-state information. Skipping indicator.')
                     break
@@ -89,6 +113,12 @@ def main() -> None:
     for directory in (RAW_DATA_DIR, PROCESSED_DATA_DIR):
         directory.mkdir(parents=True, exist_ok=True)
 
+    inegi_indicators = ['6207077700', '6207077710', '6207077719', '6207077733', 
+                          '6207077741', '6207077743', '6207077748', '6207129563', 
+                          '6207129580', '6207129584', '6207129594','6207129595',
+                          '6207129600','6207129608','6207129609', '6207095692',
+                          '6207095711','6207095719','6207129821']
+
     # Each entry is "name of the task": function with no arguments.
     # To add a new source, write its download function and add one line here.
     download_raw_data: dict[str, Callable[[], None]] = {
@@ -97,8 +127,11 @@ def main() -> None:
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
-            indicators = ['6207131412'],#'6207095719','6207095692'],
-            stateDict = download_inegi_metadata()
+            inegi_indicators
+        ),
+        "INEGI-Metadata": lambda: download_inegi_metadata(
+            RAW_DATA_DIR,
+            inegi_indicators
         )
         # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
     }
