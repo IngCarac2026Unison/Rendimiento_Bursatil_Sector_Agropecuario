@@ -5,6 +5,7 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 import yfinance as yf
+import requests
 
 from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
 
@@ -29,6 +30,43 @@ def download_finance_data(
     logger.success(f"YAHOO Finance data downloaded successfully: {output_path}")
 
 
+
+def download_sniim_data(
+    output_path: Path,
+    market_code: str = "100",
+    market_name: str = "Iztapalapa",
+) -> None:
+     
+    logger.info(f"Descargando maíz blanco de {market_name}...")
+    url = (
+        "http://www.economia-sniim.gob.mx/"
+        "SNIIM-AN/estadisticas/anuariosgran1.asp"
+    )
+
+   
+
+    response = requests.post(
+        url,
+        data={
+            "cent": market_code,
+            "prod": "OMABLAN",
+            "ACCION": "Aceptar",
+        },
+        timeout=60,
+    )
+    response.raise_for_status()
+
+    if market_name not in response.text or "2013" not in response.text:
+        raise ValueError(f"El SNIIM no devolvió la tabla esperada de {market_name}.")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_bytes(response.content)
+
+    logger.success(f"Tabla SNIIM guardada en: {output_path}")
+
+
+
+
 @app.command()
 def main() -> None:
 
@@ -42,7 +80,31 @@ def main() -> None:
         "Finance data (YAHOO Finance)": lambda: download_finance_data(
             RAW_DATA_DIR / "rendimiento_acciones.csv"
         ),
-        # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
+                        "SNIIM Hermosillo": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
+            market_code="260",
+            market_name="Hermosillo",
+        ),
+        "SNIIM Culiacán": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
+            market_code="250",
+            market_name="Culiacán",
+        ),
+        "SNIIM Guadalajara": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
+            market_code="140",
+            market_name="Guadalajara",
+        ),
+        "SNIIM Iztapalapa": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
+            market_code="100",
+            market_name="Iztapalapa",
+        ),
+        "SNIIM Guadalupe": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
+            market_code="191",
+            market_name="Guadalupe",
+        ),
     }
 
     logger.info("Downloading raw data...")

@@ -19,6 +19,7 @@ dependencies = [
     "loguru",
     "pip",
     "python-dotenv",
+    "requests>=2.34.2",
     "ruff",
     "tqdm",
     "typer",
