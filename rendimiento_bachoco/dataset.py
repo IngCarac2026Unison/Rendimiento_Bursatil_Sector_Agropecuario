@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable
+from typing import Callable, List
 
 from loguru import logger
 from tqdm import tqdm
@@ -7,6 +7,8 @@ import typer
 import yfinance as yf
 
 from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+import urllib.request
+import json
 
 app = typer.Typer()
 
@@ -29,6 +31,50 @@ def download_finance_data(
     logger.success(f"YAHOO Finance data downloaded successfully: {output_path}")
 
 
+def download_inegi_metadata(
+        state_dict_url: str = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/7ac527c0-67a7-88ce-0a48-9a473a8c44f0?type=json'
+):
+    state_dict_dst = RAW_DATA_DIR / 'MX_state_dict.json'
+
+
+    if not state_dict_dst.exists():
+        urllib.request.urlretrieve(state_dict_url, state_dict_dst)
+
+    stateDict = dict()
+
+    with state_dict_dst.open('r') as fp:
+        stateList = json.load(fp)['CODE']
+        for s in stateList:
+            stateDict[s['value']] = s['Description']
+        # for i in range(0, len(stateList)):
+        #     stateDict[stateList[i]['value']] = stateList[i]['Description']
+
+    # Delete 'Otros estados', 'Extranjero' and 'No especificada'
+    del stateDict['35']
+    del stateDict['36']
+    del stateDict['39']
+
+    return stateDict
+
+def download_inegi_data(
+        data_root : Path,
+        indicators: List[str],
+        stateDict: dict
+):
+    for indicator in indicators:
+        for sCode in stateDict.keys():
+
+            dest_dir = data_root / 'INEGI' / indicator
+            # if not dest_dir.exists():
+            Path.mkdir(dest_dir, parents = True, exist_ok = True)
+
+            # TODO: Replace API key
+            src = 'https://inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR/' + indicator + '/es/' + sCode + '/false/BISE/2.0/7ac527c0-67a7-88ce-0a48-9a473a8c44f0?type=json'
+            dst_file = sCode + '.json'
+
+            if not Path(dst_file).exists():
+                urllib.request.urlretrieve(src, dest_dir / dst_file)
+
 @app.command()
 def main() -> None:
 
@@ -42,6 +88,11 @@ def main() -> None:
         "Finance data (YAHOO Finance)": lambda: download_finance_data(
             RAW_DATA_DIR / "rendimiento_acciones.csv"
         ),
+        "INEGI-Indicators": lambda: download_inegi_data(
+            RAW_DATA_DIR,
+            indicators = ['6207095719'],
+            stateDict = download_inegi_metadata()
+        )
         # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
     }
 
@@ -65,6 +116,9 @@ def main() -> None:
         raise typer.Exit(code=1)
 
     logger.success("All downloads complete.")
+
+
+
 
 
 if __name__ == "__main__":
