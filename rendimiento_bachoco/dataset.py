@@ -1,10 +1,14 @@
 from pathlib import Path
 from typing import Callable, List
 
+
+from datetime import datetime, timezone
+
 from loguru import logger
 from tqdm import tqdm
 import typer
 import yfinance as yf
+import requests
 
 from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INEGI_API_KEY
 import urllib.request
@@ -30,6 +34,55 @@ def download_finance_data(
     data.to_csv(output_path)
     logger.success(f"YAHOO Finance data downloaded successfully: {output_path}")
 
+
+def download_sniim_data(
+    output_path: Path,
+    market_code: str = "100",
+    market_name: str = "Iztapalapa",
+) -> None:
+     
+    logger.info(f"Descargando maíz blanco de {market_name}...")
+    url = (
+        "http://www.economia-sniim.gob.mx/"
+        "SNIIM-AN/estadisticas/anuariosgran1.asp"
+    )
+
+   
+
+    response = requests.post(
+        url,
+        data={
+            "cent": market_code,
+            "prod": "OMABLAN",
+            "ACCION": "Aceptar",
+        },
+        timeout=60,
+    )
+    response.raise_for_status()
+
+    if market_name not in response.text or "2013" not in response.text:
+        raise ValueError(f"El SNIIM no devolvió la tabla esperada de {market_name}.")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_bytes(response.content)
+    metadata = (
+        "Fuente: Sistema Nacional de Información e Integración de Mercados (SNIIM)\n"
+        f"URL de consulta: {url}\n"
+        f"URL de respuesta: {response.url}\n"
+        f"Fecha de descarga (UTC): {datetime.now(timezone.utc).isoformat()}\n"
+        f"Mercado: {market_name}\n"
+        f"Código del mercado: {market_code}\n"
+        "Producto: Maíz blanco (OMABLAN)\n"
+        "Unidad: Pesos mexicanos por kilogramo\n"
+        "Frecuencia: Promedios mensuales\n"
+        "Contenido: Tabla histórica original en formato HTML, sin filtrar años.\n"
+        "Origen: Procedencia del producto; distinto de la ubicación del mercado.\n"
+        "Valores faltantes: Las celdas vacías no representan precios de cero.\n"
+        f"Archivo de datos: {output_path.name}\n"
+    )
+    output_path.with_suffix(".txt").write_text(metadata, encoding="utf-8")
+
+    logger.success(f"Tabla SNIIM guardada en: {output_path}")
 
 def get_state_dict():
     
@@ -124,6 +177,31 @@ def main() -> None:
     download_raw_data: dict[str, Callable[[], None]] = {
         "Finance data (YAHOO Finance)": lambda: download_finance_data(
             RAW_DATA_DIR / "rendimiento_acciones.csv"
+        ),
+                        "SNIIM Hermosillo": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
+            market_code="260",
+            market_name="Hermosillo",
+        ),
+        "SNIIM Culiacán": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
+            market_code="250",
+            market_name="Culiacán",
+        ),
+        "SNIIM Guadalajara": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
+            market_code="140",
+            market_name="Guadalajara",
+        ),
+        "SNIIM Iztapalapa": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
+            market_code="100",
+            market_name="Iztapalapa",
+        ),
+        "SNIIM Guadalupe": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
+            market_code="191",
+            market_name="Guadalupe",
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
