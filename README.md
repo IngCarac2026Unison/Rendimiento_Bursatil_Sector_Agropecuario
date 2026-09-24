@@ -48,6 +48,27 @@ Como posible fuente complementaria se evaluarán los datos abiertos de producci�
 - **Datos cuantitativos:** precios, volúmenes y rendimientos bursátiles.
 - **Datos cualitativos:** producto, variedad, presentación y mercado.
 
+## Procesamiento de precios del SNIIM
+
+Desde la raíz del repositorio, instala las dependencias con `uv sync`. La descarga
+general se ejecuta con `uv run python rendimiento_bachoco/dataset.py` (o `make data`
+si tienes `make` instalado). Ese comando descarga todas las fuentes del proyecto;
+la parte del INEGI requiere su propia clave de API.
+
+Cuando existan los cinco archivos `data/raw/sniim_*_maiz_blanco.html`, transforma
+los precios del maíz blanco con:
+
+```bash
+uv run python rendimiento_bachoco/process_sniim.py
+```
+
+Si tienes `make`, el comando equivalente es `make process_sniim`. El resultado es
+`data/processed/sniim_maiz_blanco_mensual.csv`: una fila por mes, mercado y origen
+del maíz, entre 2013 y 2025. Las celdas vacías conservan el precio como dato
+faltante. El script comprueba fechas, claves duplicadas y precios no positivos.
+Consulta `references/diccionario_sniim_maiz_blanco.md` para la descripción de
+cada columna.
+
 ## Project Organization
 
 ```

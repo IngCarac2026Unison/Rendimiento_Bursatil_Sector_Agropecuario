@@ -64,6 +64,12 @@ data: requirements
 	$(PYTHON_INTERPRETER) rendimiento_bachoco/dataset.py
 
 
+## Transform SNIIM raw HTML into a tidy monthly CSV
+.PHONY: process_sniim
+process_sniim:
+	uv run python rendimiento_bachoco/process_sniim.py
+
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
