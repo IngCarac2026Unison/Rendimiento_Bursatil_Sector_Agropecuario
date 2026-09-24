@@ -9,6 +9,7 @@ from tqdm import tqdm
 import typer
 import yfinance as yf
 import requests
+import pandas as pd
 
 from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INEGI_API_KEY
 import urllib.request
@@ -162,6 +163,33 @@ def download_inegi_data(
                 url_call(data_src, data_dst)    
             except urllib.error.HTTPError as e:
                 raise(e)
+            
+
+
+
+def download_dgsiap(
+        output_path : Path,
+        start_year: int,
+        end_year: int,
+):
+    
+    Path.mkdir(output_path, parents = True, exist_ok = True)
+
+    logger.info(f"Downloading data from DGSIAP")
+
+    meta_df = pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(output_path / f"metadata.xlsx")
+    
+    for year in range(start_year, end_year + 1):
+        pd.read_csv(f"https://nube.agricultura.gob.mx/index.php?view=10AE434F-A2158368-A120BC5A-EDF4AFAA&ANIO={year}", encoding = "latin1").to_csv(output_path / f"{year}.csv")
+
+    log_text = f'''DGSIAP Info downloaded on {datetime.now()}'''
+    text_log_id = logger.add(output_path / "dgsiap_log.txt")
+    logger.info(log_text)
+    logger.remove(text_log_id)
+
+
+
+
 
 
 @app.command()
@@ -211,8 +239,13 @@ def main() -> None:
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
             inegi_indicators
-        )
+        ),
         # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
+        "DGSIAP": lambda: download_dgsiap(
+            RAW_DATA_DIR / "DGSIAP",
+            2013,
+            2025
+        )
     }
 
     logger.info("Downloading raw data...")
