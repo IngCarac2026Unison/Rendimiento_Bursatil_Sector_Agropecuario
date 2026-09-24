@@ -121,34 +121,34 @@ def main() -> None:
     # Each entry is "name of the task": function with no arguments.
     # To add a new source, write its download function and add one line here.
     download_raw_data: dict[str, Callable[[], None]] = {
-        # "Finance data (YAHOO Finance)": lambda: download_finance_data(
-        #     RAW_DATA_DIR / "rendimiento_acciones.csv"
-        # ),
-        #                 "SNIIM Hermosillo": lambda: download_sniim_data(
-        #     RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
-        #     market_code="260",
-        #     market_name="Hermosillo",
-        # ),
-        # "SNIIM Culiacán": lambda: download_sniim_data(
-        #     RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
-        #     market_code="250",
-        #     market_name="Culiacán",
-        # ),
-        # "SNIIM Guadalajara": lambda: download_sniim_data(
-        #     RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
-        #     market_code="140",
-        #     market_name="Guadalajara",
-        # ),
-        # "SNIIM Iztapalapa": lambda: download_sniim_data(
-        #     RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
-        #     market_code="100",
-        #     market_name="Iztapalapa",
-        # ),
-        # "SNIIM Guadalupe": lambda: download_sniim_data(
-        #     RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
-        #     market_code="191",
-        #     market_name="Guadalupe",
-        # ),
+        "Finance data (YAHOO Finance)": lambda: download_finance_data(
+            RAW_DATA_DIR / "rendimiento_acciones.csv"
+        ),
+                        "SNIIM Hermosillo": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
+            market_code="260",
+            market_name="Hermosillo",
+        ),
+        "SNIIM Culiacán": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
+            market_code="250",
+            market_name="Culiacán",
+        ),
+        "SNIIM Guadalajara": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
+            market_code="140",
+            market_name="Guadalajara",
+        ),
+        "SNIIM Iztapalapa": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
+            market_code="100",
+            market_name="Iztapalapa",
+        ),
+        "SNIIM Guadalupe": lambda: download_sniim_data(
+            RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
+            market_code="191",
+            market_name="Guadalupe",
+        ),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
             2013,
