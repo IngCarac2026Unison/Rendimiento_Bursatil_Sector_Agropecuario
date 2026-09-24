@@ -9,6 +9,7 @@ from tqdm import tqdm
 import typer
 import yfinance as yf
 import requests
+import pandas as pd
 
 from rendimiento_bachoco.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
 
@@ -84,6 +85,30 @@ def download_sniim_data(
     logger.success(f"Tabla SNIIM guardada en: {output_path}")
 
 
+def download_dgsiap(
+        output_path : Path,
+        start_year: int,
+        end_year: int,
+
+):
+    
+    Path.mkdir(output_path, parents = True, exist_ok = True)
+
+    logger.info(f"Downloading data from DGSIAP")
+
+    meta_df = pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(output_path / f"metadata.xlsx")
+    
+    for year in range(start_year, end_year + 1):
+        pd.read_csv(f"https://nube.agricultura.gob.mx/index.php?view=10AE434F-A2158368-A120BC5A-EDF4AFAA&ANIO={year}", encoding = "latin1").to_csv(output_path / f"{year}.csv")
+
+    log_text = f'''DGSIAP Info downloaded on {datetime.now()}'''
+    text_log_id = logger.add(output_path / "dgsiap_log.txt")
+    logger.info(log_text)
+    logger.remove(text_log_id)
+
+
+
+
 
 
 @app.command()
@@ -96,34 +121,39 @@ def main() -> None:
     # Each entry is "name of the task": function with no arguments.
     # To add a new source, write its download function and add one line here.
     download_raw_data: dict[str, Callable[[], None]] = {
-        "Finance data (YAHOO Finance)": lambda: download_finance_data(
-            RAW_DATA_DIR / "rendimiento_acciones.csv"
-        ),
-                        "SNIIM Hermosillo": lambda: download_sniim_data(
-            RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
-            market_code="260",
-            market_name="Hermosillo",
-        ),
-        "SNIIM Culiacán": lambda: download_sniim_data(
-            RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
-            market_code="250",
-            market_name="Culiacán",
-        ),
-        "SNIIM Guadalajara": lambda: download_sniim_data(
-            RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
-            market_code="140",
-            market_name="Guadalajara",
-        ),
-        "SNIIM Iztapalapa": lambda: download_sniim_data(
-            RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
-            market_code="100",
-            market_name="Iztapalapa",
-        ),
-        "SNIIM Guadalupe": lambda: download_sniim_data(
-            RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
-            market_code="191",
-            market_name="Guadalupe",
-        ),
+        # "Finance data (YAHOO Finance)": lambda: download_finance_data(
+        #     RAW_DATA_DIR / "rendimiento_acciones.csv"
+        # ),
+        #                 "SNIIM Hermosillo": lambda: download_sniim_data(
+        #     RAW_DATA_DIR / "sniim_hermosillo_maiz_blanco.html",
+        #     market_code="260",
+        #     market_name="Hermosillo",
+        # ),
+        # "SNIIM Culiacán": lambda: download_sniim_data(
+        #     RAW_DATA_DIR / "sniim_culiacan_maiz_blanco.html",
+        #     market_code="250",
+        #     market_name="Culiacán",
+        # ),
+        # "SNIIM Guadalajara": lambda: download_sniim_data(
+        #     RAW_DATA_DIR / "sniim_guadalajara_maiz_blanco.html",
+        #     market_code="140",
+        #     market_name="Guadalajara",
+        # ),
+        # "SNIIM Iztapalapa": lambda: download_sniim_data(
+        #     RAW_DATA_DIR / "sniim_iztapalapa_maiz_blanco.html",
+        #     market_code="100",
+        #     market_name="Iztapalapa",
+        # ),
+        # "SNIIM Guadalupe": lambda: download_sniim_data(
+        #     RAW_DATA_DIR / "sniim_guadalupe_maiz_blanco.html",
+        #     market_code="191",
+        #     market_name="Guadalupe",
+        # ),
+        "DGSIAP": lambda: download_dgsiap(
+            RAW_DATA_DIR / "DGSIAP",
+            2013,
+            2025
+        )
     }
 
     logger.info("Downloading raw data...")
