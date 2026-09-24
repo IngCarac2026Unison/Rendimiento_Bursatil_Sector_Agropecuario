@@ -131,6 +131,7 @@ def download_inegi_data(
 
     meta_dst_dir = Path(RAW_DATA_DIR / 'INEGI' / 'METADATA')
 
+    logger.info("Downloading data from INEGI...")
 
     for indicator in indicators:
 
@@ -163,7 +164,14 @@ def download_inegi_data(
                 url_call(data_src, data_dst)    
             except urllib.error.HTTPError as e:
                 raise(e)
-            
+    
+    log_text = f'''
+        INEGI Info downloaded on {datetime.now()}. Indicators:
+        {[f'{x}' for x in indicators]}
+    '''
+    text_log_id = logger.add(meta_dst_dir / "inegi_log.txt")
+    logger.info(log_text)
+    logger.remove(text_log_id)
 
 
 
@@ -175,7 +183,7 @@ def download_dgsiap(
     
     Path.mkdir(output_path, parents = True, exist_ok = True)
 
-    logger.info(f"Downloading data from DGSIAP")
+    logger.info(f"Downloading data from DGSIAP...")
 
     meta_df = pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(output_path / f"metadata.xlsx")
     
@@ -186,10 +194,6 @@ def download_dgsiap(
     text_log_id = logger.add(output_path / "dgsiap_log.txt")
     logger.info(log_text)
     logger.remove(text_log_id)
-
-
-
-
 
 
 @app.command()
@@ -240,12 +244,12 @@ def main() -> None:
             RAW_DATA_DIR,
             inegi_indicators
         ),
-        # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
-            2013,
+            2018,
             2025
         )
+        # "Other source": lambda: download_other_source(RAW_DATA_DIR / "other_source.csv"),
     }
 
     logger.info("Downloading raw data...")
