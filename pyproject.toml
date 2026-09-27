@@ -26,7 +26,10 @@ dependencies = [
     "tqdm",
     "typer",
     "yfinance",
-    "openpyxl"
+    "openpyxl",
+    "arrow>=1.4.0",
+    "pyarrow>=25.0.1",
+    "pandera[pandas]>=0.20.0",
 ]
 requires-python = "~=3.12.0"
 
