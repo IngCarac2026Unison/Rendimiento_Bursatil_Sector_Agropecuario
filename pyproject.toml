@@ -17,6 +17,8 @@ classifiers = [
 ]
 dependencies = [
     "loguru",
+    "lxml",
+    "pandas",
     "pip",
     "python-dotenv",
     "requests>=2.34.2",

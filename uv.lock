@@ -370,7 +370,9 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "loguru" },
+    { name = "lxml" },
     { name = "openpyxl" },
+    { name = "pandas" },
     { name = "pip" },
     { name = "python-dotenv" },
     { name = "requests" },
@@ -383,7 +385,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "loguru" },
+    { name = "lxml" },
     { name = "openpyxl" },
+    { name = "pandas" },
     { name = "pip" },
     { name = "python-dotenv" },
     { name = "requests", specifier = ">=2.34.2" },
