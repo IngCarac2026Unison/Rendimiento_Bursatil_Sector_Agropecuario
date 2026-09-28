@@ -74,7 +74,7 @@ def main() -> None:
         ),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
-            2018,
+            2013,
             2025
         )
     }
