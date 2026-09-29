@@ -7,7 +7,7 @@ import pandas as pd
 
 from loguru import logger
 
-from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR, REFERENCES_DIR
+from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR, REFERENCES_DIR, INTERIM_DATA_DIR
 
 
 def url_call(url: str, dst: Path):
@@ -137,7 +137,7 @@ def process_inegi_data(
 
     inegi_meta_df = pd.concat(dfs, ignore_index=True)
     inegi_meta_df = inegi_meta_df.drop(columns = ["id", "agencyID", "version", "lang", "indicator"], errors = 'ignore')
-    inegi_meta_df = inegi_meta_df.rename(columns = {"value": "Indicador"})
+    inegi_meta_df = inegi_meta_df.rename(columns = {"value": "Indicador", "Description": "Descripcion"})
     inegi_meta_df.to_csv(PROCESSED_DATA_DIR / 'inegi_metadata.csv')
 
 
@@ -162,6 +162,12 @@ def process_inegi_data(
     observations_json = exploded_df["OBSERVATIONS"]
     obs_df = pd.json_normalize(observations_json)
     inegi_data_expanded = exploded_df.drop(columns=["OBSERVATIONS"]).join(obs_df)
-    inegi_data_expanded.to_csv(PROCESSED_DATA_DIR / "inegi_data.csv")
+    inegi_data_expanded = inegi_data_expanded.drop(columns = ['OBS_EXCEPTION', 'STATUS', 'OBS_SOURCE', 'OBS_NOTE', 'Indicator'], errors = 'ignore')
+    inegi_data_expanded['TIME_PERIOD'] =  pd.to_datetime(inegi_data_expanded['TIME_PERIOD'], format ='mixed', yearfirst = True)
+    inegi_data_expanded['LASTUPDATE'] =  pd.to_datetime(inegi_data_expanded['LASTUPDATE'], format ='mixed', dayfirst = True)
+    inegi_data_expanded['TOPIC'] = inegi_data_expanded['TOPIC'].astype('int')
+    inegi_data_expanded['OBS_VALUE'] = inegi_data_expanded['OBS_VALUE'].astype('float')
+    inegi_data_expanded['COBER_GEO'] = inegi_data_expanded['COBER_GEO'].astype('int')
+    inegi_data_expanded.to_csv(INTERIM_DATA_DIR / "inegi_data.csv")
 
     
