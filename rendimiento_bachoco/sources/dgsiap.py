@@ -16,7 +16,7 @@ def download_dgsiap(
 
     logger.info("\tDescargando datos de DGSIAP...")
     if not meta_output_file.exists() or force:
-        meta_df = pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(meta_output_file)
+        pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(meta_output_file)
     else:
         logger.info(f"Requerimiento de descarga previamente satisfecho: {meta_output_file}")
 

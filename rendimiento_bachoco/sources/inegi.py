@@ -7,13 +7,15 @@ import pandas as pd
 
 from loguru import logger
 
-from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR
+from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR, REFERENCES_DIR
 
 
 def url_call(url: str, dst: Path):
     try:
         if not dst.exists():
             urllib.request.urlretrieve(url, dst)
+        else: 
+            logger.info(f'Requerimiento de descarga previamente satisfecho: {dst}')
 
     except urllib.error.HTTPError as e:
         raise ValueError(e)
@@ -22,7 +24,7 @@ def url_call(url: str, dst: Path):
 def get_state_dict():
 
     dict_url: str = f'https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/{str(INEGI_API_KEY)}?type=json'
-    dict_dir = RAW_DATA_DIR / 'INEGI' / 'MX_state_dict.json'
+    dict_dir = REFERENCES_DIR / 'INEGI'
     dict_dst = dict_dir / 'MX_state_dict.json'
 
     Path.mkdir(dict_dir, parents = True, exist_ok = True)
@@ -56,7 +58,7 @@ def download_inegi_data(
     data_arg = 'INDICATOR'
     meta_arg = 'CL_INDICATOR'
 
-    meta_dst_dir = Path(RAW_DATA_DIR / 'INEGI' / 'METADATA')
+    meta_dst_dir = REFERENCES_DIR / 'INEGI' / 'METADATA'
 
     logger.info("\tDescargando datos del INEGI...")
 
@@ -119,7 +121,7 @@ def process_inegi_data(
 
     # METADATA
     dfs = []
-    for path in (RAW_DATA_DIR / "INEGI" / "METADATA").iterdir():
+    for path in (REFERENCES_DIR / "INEGI" / "METADATA").iterdir():
         if path.is_file() and path.suffix == ".json":
             with open(path, "r", encoding="utf-8") as fp:
                 data = json.load(fp)
