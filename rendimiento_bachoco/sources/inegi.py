@@ -161,6 +161,7 @@ def process_inegi_data(
     exploded_df = inegi_data_df.explode("OBSERVATIONS").reset_index(drop=True)
     observations_json = exploded_df["OBSERVATIONS"]
     obs_df = pd.json_normalize(observations_json)
+
     inegi_data_expanded = exploded_df.drop(columns=["OBSERVATIONS"]).join(obs_df)
     inegi_data_expanded = inegi_data_expanded.drop(columns = ['OBS_EXCEPTION', 'STATUS', 'OBS_SOURCE', 'OBS_NOTE', 'Indicator'], errors = 'ignore')
     inegi_data_expanded['TIME_PERIOD'] =  pd.to_datetime(inegi_data_expanded['TIME_PERIOD'], format ='mixed', yearfirst = True)
@@ -168,6 +169,9 @@ def process_inegi_data(
     inegi_data_expanded['TOPIC'] = inegi_data_expanded['TOPIC'].astype('int')
     inegi_data_expanded['OBS_VALUE'] = inegi_data_expanded['OBS_VALUE'].astype('float')
     inegi_data_expanded['COBER_GEO'] = inegi_data_expanded['COBER_GEO'].astype('int')
+    inegi_data_expanded['UNIT_MULT'] = inegi_data_expanded['UNIT_MULT'].fillna('-1')
+    inegi_data_expanded['NOTE'] = inegi_data_expanded['NOTE'].fillna('-1')
+    inegi_data_expanded['NOTE'] = inegi_data_expanded['NOTE'].astype("string[pyarrow]").fillna('-1')
     inegi_data_expanded.to_csv(INTERIM_DATA_DIR / "inegi_data.csv")
 
     
