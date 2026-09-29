@@ -46,3 +46,10 @@ extend-select = ["I"]  # Add import sorting
 known-first-party = ["rendimiento_bachoco"]
 force-sort-within-sections = true
 
+[dependency-groups]
+dev = [
+    "ipykernel>=7.3.0",
+    "jupyter>=1.1.1",
+    "regex>=2026.9.10",
+]
+

@@ -7,7 +7,7 @@ import typer
 from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 from rendimiento_bachoco.quality.yahoo import validate_finance_monthly, validate_finance_raw
 from rendimiento_bachoco.sources.dgsiap import download_dgsiap
-from rendimiento_bachoco.sources.inegi import download_inegi_data
+from rendimiento_bachoco.sources.inegi import download_inegi_data, process_inegi_data
 from rendimiento_bachoco.sources.sniim import download_sniim_data
 from rendimiento_bachoco.sources.yahoo import download_finance_data, process_finance_data
 
@@ -74,7 +74,7 @@ def main() -> None:
         ),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
-            2018,
+            2013,
             2025
         )
     }
@@ -85,6 +85,11 @@ def main() -> None:
         "Finance data (monthly returns)": lambda: process_finance_data(
             RAW_DATA_DIR / "RendimientoYahoo", INTERIM_DATA_DIR
         ),
+        "INEGI indicators and metadata to tidy format": lambda: process_inegi_data(
+            inegi_raw_dir = RAW_DATA_DIR / "INEGI",
+            inegi_tidy_dir = PROCESSED_DATA_DIR / "INEGI",
+            indicators = inegi_indicators
+        )
     }
 
     # Solo la fuente financiera tiene validación de calidad por ahora.
