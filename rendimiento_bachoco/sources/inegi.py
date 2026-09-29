@@ -138,7 +138,7 @@ def process_inegi_data(
     inegi_meta_df = pd.concat(dfs, ignore_index=True)
     inegi_meta_df = inegi_meta_df.drop(columns = ["id", "agencyID", "version", "lang", "indicator"], errors = 'ignore')
     inegi_meta_df = inegi_meta_df.rename(columns = {"value": "Indicador", "Description": "Descripcion"})
-    inegi_meta_df.to_csv(PROCESSED_DATA_DIR / 'inegi_metadata.csv')
+    inegi_meta_df.to_csv(INTERIM_DATA_DIR / 'inegi_metadata.csv')
 
 
 

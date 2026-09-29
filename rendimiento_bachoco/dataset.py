@@ -4,7 +4,7 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR, REFERENCES_DIR
 from rendimiento_bachoco.quality.yahoo import validate_finance_monthly, validate_finance_raw
 from rendimiento_bachoco.quality.inegi import validate_inegi
 from rendimiento_bachoco.sources.dgsiap import download_dgsiap
@@ -102,11 +102,11 @@ def main() -> None:
             INTERIM_DATA_DIR / "rendimiento_mensual.parquet"
         ),
         "Metadatos INEGI (tidy)" : lambda : validate_inegi(
-            raw_path = INTERIM_DATA_DIR,
+            raw_path = INTERIM_DATA_DIR / 'inegi_metadata.csv',
             meta = True
         ),
         "Datos INEGI (tidy)" : lambda : validate_inegi(
-            raw_path = INTERIM_DATA_DIR,
+            raw_path = INTERIM_DATA_DIR / 'inegi_data.csv',
             meta = False
         ),
     }
