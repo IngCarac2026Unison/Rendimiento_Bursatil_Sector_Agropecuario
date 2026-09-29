@@ -35,11 +35,17 @@ El SNIIM, perteneciente a la Secretaría de Economía, publica precios del maíz
 
 Esta fuente contiene información temporal, cuantitativa, cualitativa y geográfica, como fecha, mercado, ciudad, estado, variedad, presentación y precio.
 
-### Fuente complementaria: DGSIAP
+### Fuentes complementarias: DGSIAP
 
 Como posible fuente complementaria se evaluarán los datos abiertos de producción de maíz por estado y municipio.
 
 - https://nube.agricultura.gob.mx/datosAbiertos/Agricola.php
+
+### Fuentes complementarias: INEGI
+
+Adicionalmente se analizan una variedad de indicadores de la base de datos abierta del Instituto Nacional de Estadística y Geografía (INEGI)
+
+- https://www.inegi.org.mx/servicios/api_indicadores.html
 
 ## Tipos de datos
 
