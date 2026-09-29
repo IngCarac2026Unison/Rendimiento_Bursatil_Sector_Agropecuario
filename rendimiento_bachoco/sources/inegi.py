@@ -7,13 +7,15 @@ import pandas as pd
 
 from loguru import logger
 
-from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR
+from rendimiento_bachoco.config import INEGI_API_KEY, RAW_DATA_DIR, PROCESSED_DATA_DIR, REFERENCES_DIR, INTERIM_DATA_DIR
 
 
 def url_call(url: str, dst: Path):
     try:
         if not dst.exists():
             urllib.request.urlretrieve(url, dst)
+        else: 
+            logger.info(f'Requerimiento de descarga previamente satisfecho: {dst}')
 
     except urllib.error.HTTPError as e:
         raise ValueError(e)
@@ -22,7 +24,7 @@ def url_call(url: str, dst: Path):
 def get_state_dict():
 
     dict_url: str = f'https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/CL_GEO_AREA/0/es/BISE/2.0/{str(INEGI_API_KEY)}?type=json'
-    dict_dir = RAW_DATA_DIR / 'INEGI' / 'MX_state_dict.json'
+    dict_dir = REFERENCES_DIR / 'INEGI'
     dict_dst = dict_dir / 'MX_state_dict.json'
 
     Path.mkdir(dict_dir, parents = True, exist_ok = True)
@@ -56,7 +58,7 @@ def download_inegi_data(
     data_arg = 'INDICATOR'
     meta_arg = 'CL_INDICATOR'
 
-    meta_dst_dir = Path(RAW_DATA_DIR / 'INEGI' / 'METADATA')
+    meta_dst_dir = REFERENCES_DIR / 'INEGI' / 'METADATA'
 
     logger.info("\tDescargando datos del INEGI...")
 
@@ -119,7 +121,7 @@ def process_inegi_data(
 
     # METADATA
     dfs = []
-    for path in (RAW_DATA_DIR / "INEGI" / "METADATA").iterdir():
+    for path in (REFERENCES_DIR / "INEGI" / "METADATA").iterdir():
         if path.is_file() and path.suffix == ".json":
             with open(path, "r", encoding="utf-8") as fp:
                 data = json.load(fp)
@@ -135,8 +137,8 @@ def process_inegi_data(
 
     inegi_meta_df = pd.concat(dfs, ignore_index=True)
     inegi_meta_df = inegi_meta_df.drop(columns = ["id", "agencyID", "version", "lang", "indicator"], errors = 'ignore')
-    inegi_meta_df = inegi_meta_df.rename(columns = {"value": "Indicador"})
-    inegi_meta_df.to_csv(PROCESSED_DATA_DIR / 'inegi_metadata.csv')
+    inegi_meta_df = inegi_meta_df.rename(columns = {"value": "Indicador", "Description": "Descripcion"})
+    inegi_meta_df.to_csv(INTERIM_DATA_DIR / 'inegi_metadata.csv')
 
 
 
@@ -159,7 +161,17 @@ def process_inegi_data(
     exploded_df = inegi_data_df.explode("OBSERVATIONS").reset_index(drop=True)
     observations_json = exploded_df["OBSERVATIONS"]
     obs_df = pd.json_normalize(observations_json)
+
     inegi_data_expanded = exploded_df.drop(columns=["OBSERVATIONS"]).join(obs_df)
-    inegi_data_expanded.to_csv(PROCESSED_DATA_DIR / "inegi_data.csv")
+    inegi_data_expanded = inegi_data_expanded.drop(columns = ['OBS_EXCEPTION', 'STATUS', 'OBS_SOURCE', 'OBS_NOTE', 'Indicator'], errors = 'ignore')
+    inegi_data_expanded['TIME_PERIOD'] =  pd.to_datetime(inegi_data_expanded['TIME_PERIOD'], format ='mixed', yearfirst = True)
+    inegi_data_expanded['LASTUPDATE'] =  pd.to_datetime(inegi_data_expanded['LASTUPDATE'], format ='mixed', dayfirst = True)
+    inegi_data_expanded['TOPIC'] = inegi_data_expanded['TOPIC'].astype('int')
+    inegi_data_expanded['OBS_VALUE'] = inegi_data_expanded['OBS_VALUE'].astype('float')
+    inegi_data_expanded['COBER_GEO'] = inegi_data_expanded['COBER_GEO'].astype('int')
+    inegi_data_expanded['UNIT_MULT'] = inegi_data_expanded['UNIT_MULT'].fillna('-1')
+    inegi_data_expanded['NOTE'] = inegi_data_expanded['NOTE'].fillna('-1')
+    inegi_data_expanded['NOTE'] = inegi_data_expanded['NOTE'].astype("string[pyarrow]").fillna('-1')
+    inegi_data_expanded.to_csv(INTERIM_DATA_DIR / "inegi_data.csv")
 
     
