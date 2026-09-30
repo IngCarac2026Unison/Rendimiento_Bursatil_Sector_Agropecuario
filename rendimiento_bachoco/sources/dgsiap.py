@@ -3,6 +3,7 @@ from pathlib import Path
 
 from loguru import logger
 import pandas as pd
+from rendimiento_bachoco.config import INTERIM_DATA_DIR
 
 
 def download_dgsiap(
@@ -11,7 +12,7 @@ def download_dgsiap(
         end_year: int,
         force = False
 ):
-    meta_output_file = output_path / "metadata.xlsx"
+    meta_output_file = INTERIM_DATA_DIR / "metadata.csv"
     Path.mkdir(output_path, parents = True, exist_ok = True)
 
     logger.info("\tDescargando datos de DGSIAP...")
