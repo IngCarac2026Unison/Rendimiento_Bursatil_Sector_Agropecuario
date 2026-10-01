@@ -3,7 +3,25 @@ from pathlib import Path
 
 from loguru import logger
 import pandas as pd
-from rendimiento_bachoco.config import INTERIM_DATA_DIR
+from rendimiento_bachoco.config import REFERENCES_DIR, DGSIAP_START_YEAR, DGSIAP_END_YEAR
+
+
+def process_dgsiap(raw_dir: Path, 
+                   tidy_dir: Path):
+    Path.mkdir(tidy_dir, parents = True, exist_ok = True)
+
+    logger.info("Procesando datos de DGSIAP...")
+    for year in  range(DGSIAP_START_YEAR, DGSIAP_END_YEAR + 1):
+        logger.info(f"Procesando {year}...")
+        dgsiap_df = pd.read_csv(raw_dir / f'{year}.csv', index_col = 0)
+
+        # Unas inconsistencias en algunos años (2021...)
+        dgsiap_df['Sembrada'] = dgsiap_df['Sembrada'].astype(str).str.replace(',', '', regex=True).astype(float) 
+        dgsiap_df['Volumenproduccion'] = dgsiap_df['Volumenproduccion'].astype(str).str.replace(',', '', regex=True).astype(float) 
+
+        dgsiap_df.to_csv(tidy_dir / f'{year}.csv')
+
+    logger.success("Datos DGISAP procesados.")
 
 
 def download_dgsiap(
@@ -12,12 +30,13 @@ def download_dgsiap(
         end_year: int,
         force = False
 ):
-    meta_output_file = INTERIM_DATA_DIR / "metadata.csv"
+    meta_output_file =  REFERENCES_DIR / "dgsiap_metadata.csv"
     Path.mkdir(output_path, parents = True, exist_ok = True)
 
     logger.info("\tDescargando datos de DGSIAP...")
     if not meta_output_file.exists() or force:
         pd.read_excel("https://nube.agricultura.gob.mx/index.php?view=5D24F995-E734D711-1EA6F8D2-9D1387D7", engine = "openpyxl").to_csv(meta_output_file)
+
     else:
         logger.info(f"Requerimiento de descarga previamente satisfecho: {meta_output_file}")
 
@@ -26,6 +45,7 @@ def download_dgsiap(
         data_output_file = output_path / f"{year}.csv"
         if not data_output_file.exists() or force:
             pd.read_csv(f"https://nube.agricultura.gob.mx/index.php?view=10AE434F-A2158368-A120BC5A-EDF4AFAA&ANIO={year}", encoding = "latin1").to_csv(data_output_file)
+            
         else:
             logger.info(f"Requerimiento de descarga previamente satisfecho: {data_output_file}")
 

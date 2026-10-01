@@ -4,10 +4,11 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR, REFERENCES_DIR, INDICATORS_INEGI
+from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR, REFERENCES_DIR, INDICATORS_INEGI, DGSIAP_START_YEAR, DGSIAP_END_YEAR 
 from rendimiento_bachoco.quality.yahoo import validate_finance_monthly, validate_finance_raw
 from rendimiento_bachoco.quality.inegi import validate_inegi
-from rendimiento_bachoco.sources.dgsiap import download_dgsiap
+from rendimiento_bachoco.quality.dgsiap import validate_dgsiap
+from rendimiento_bachoco.sources.dgsiap import download_dgsiap, process_dgsiap
 from rendimiento_bachoco.sources.inegi import download_inegi_data, process_inegi_data
 from rendimiento_bachoco.sources.sniim import download_sniim_data
 from rendimiento_bachoco.sources.yahoo import download_finance_data, process_finance_data
@@ -70,13 +71,12 @@ def main() -> None:
         ),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
-            2013,
-            2025
+            DGSIAP_START_YEAR,
+            DGSIAP_END_YEAR
         )
     }
 
     # SNIIM se procesa aparte en rendimiento_bachoco/process_sniim.py (ver README).
-    # INEGI aún no tiene función de procesamiento.
     process_raw_data: dict[str, Callable[[], None]] = {
         "Finance data (monthly returns)": lambda: process_finance_data(
             RAW_DATA_DIR / "RendimientoYahoo", INTERIM_DATA_DIR
@@ -85,6 +85,10 @@ def main() -> None:
             inegi_raw_dir = RAW_DATA_DIR / "INEGI",
             inegi_tidy_dir = INTERIM_DATA_DIR / "INEGI",
             indicators = INDICATORS_INEGI
+        ),
+        "DGSIAP" : lambda : process_dgsiap(
+            raw_dir = RAW_DATA_DIR / 'DGSIAP',
+            tidy_dir = INTERIM_DATA_DIR / 'DGSIAP'
         )
     }
 
@@ -104,6 +108,10 @@ def main() -> None:
             raw_path = INTERIM_DATA_DIR / 'inegi_data.csv',
             meta = False
         ),
+        "Datos DGSIAP (tidy)" : lambda : validate_dgsiap(
+            INTERIM_DATA_DIR / "DGSIAP",
+            REFERENCES_DIR / 'dgsiap_metadata.csv'
+        )
     }
 
     logger.info("Descargando datos crudos...")
