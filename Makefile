@@ -15,6 +15,7 @@ PYTHON_INTERPRETER = python
 .PHONY: requirements
 requirements:
 	uv sync
+	uv add --dev regex
 	
 
 
@@ -50,6 +51,12 @@ create_environment:
 	@echo ">>> Windows: .\\\\.venv\\\\Scripts\\\\activate"
 	@echo ">>> Unix/macOS: source ./.venv/bin/activate"
 	
+## Create a jupyter kernel for data exploration
+.PHONY: kernel
+kernel:
+	uv add --dev ipykernel jupyter
+	uv run python -m ipykernel install --user --name=$(PROJECT_NAME)
+	uv run jupyter notebook
 
 
 

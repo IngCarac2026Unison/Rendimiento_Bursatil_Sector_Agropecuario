@@ -4,10 +4,11 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR, REFERENCES_DIR, INDICATORS_INEGI
 from rendimiento_bachoco.quality.yahoo import validate_finance_monthly, validate_finance_raw
+from rendimiento_bachoco.quality.inegi import validate_inegi
 from rendimiento_bachoco.sources.dgsiap import download_dgsiap
-from rendimiento_bachoco.sources.inegi import download_inegi_data
+from rendimiento_bachoco.sources.inegi import download_inegi_data, process_inegi_data
 from rendimiento_bachoco.sources.sniim import download_sniim_data
 from rendimiento_bachoco.sources.yahoo import download_finance_data, process_finance_data
 
@@ -33,11 +34,6 @@ def main() -> None:
     for directory in (RAW_DATA_DIR, INTERIM_DATA_DIR, PROCESSED_DATA_DIR):
         directory.mkdir(parents=True, exist_ok=True)
 
-    inegi_indicators = ['6207077700', '6207077710', '6207077719', '6207077733',
-                          '6207077741', '6207077743', '6207077748', '6207129563',
-                          '6207129580', '6207129584', '6207129594','6207129595',
-                          '6207129600','6207129608','6207129609', '6207095692',
-                          '6207095711','6207095719','6207129821']
 
     download_raw_data: dict[str, Callable[[], None]] = {
         "Finance data (YAHOO Finance)": lambda: download_finance_data(
@@ -70,11 +66,11 @@ def main() -> None:
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
             RAW_DATA_DIR,
-            inegi_indicators
+            INDICATORS_INEGI
         ),
         "DGSIAP": lambda: download_dgsiap(
             RAW_DATA_DIR / "DGSIAP",
-            2018,
+            2013,
             2025
         )
     }
@@ -85,6 +81,11 @@ def main() -> None:
         "Finance data (monthly returns)": lambda: process_finance_data(
             RAW_DATA_DIR / "RendimientoYahoo", INTERIM_DATA_DIR
         ),
+        "INEGI indicators and metadata to tidy format": lambda: process_inegi_data(
+            inegi_raw_dir = RAW_DATA_DIR / "INEGI",
+            inegi_tidy_dir = INTERIM_DATA_DIR / "INEGI",
+            indicators = INDICATORS_INEGI
+        )
     }
 
     # Solo la fuente financiera tiene validación de calidad por ahora.
@@ -94,6 +95,14 @@ def main() -> None:
         ),
         "Finance data (monthly schema)": lambda: validate_finance_monthly(
             INTERIM_DATA_DIR / "rendimiento_mensual.parquet"
+        ),
+        "Metadatos INEGI (tidy)" : lambda : validate_inegi(
+            raw_path = INTERIM_DATA_DIR / 'inegi_metadata.csv',
+            meta = True
+        ),
+        "Datos INEGI (tidy)" : lambda : validate_inegi(
+            raw_path = INTERIM_DATA_DIR / 'inegi_data.csv',
+            meta = False
         ),
     }
 

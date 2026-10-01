@@ -11,13 +11,17 @@ def download_sniim_data(
     market_name: str = "Iztapalapa",
 ) -> None:
 
-    logger.info(f"\tDescargando maíz blanco de {market_name}...")
+    logger.success(f"\tDescargando maíz blanco de {market_name}...")
 
     url = (
         "http://www.economia-sniim.gob.mx/"
         "SNIIM-AN/estadisticas/anuariosgran1.asp"
     )
 
+    if output_path.exists():
+        logger.info(f'Requerimiento SNIIM previamente satisfecho: {output_path}')
+        return
+    
     response = requests.post(
         url,
         data={
@@ -52,3 +56,4 @@ def download_sniim_data(
     output_path.with_suffix(".txt").write_text(metadata, encoding="utf-8")
 
     logger.success(f"\tTabla SNIIM guardada en: {output_path}")
+    
