@@ -48,26 +48,150 @@ Como posible fuente complementaria se evaluarán los datos abiertos de producci�
 - **Datos cuantitativos:** precios, volúmenes y rendimientos bursátiles.
 - **Datos cualitativos:** producto, variedad, presentación y mercado.
 
-## Procesamiento de precios del SNIIM
+## Ingesta de datos
 
-Desde la raíz del repositorio, instala las dependencias con `uv sync`. La descarga
-general se ejecuta con `uv run python rendimiento_bachoco/dataset.py` (o `make data`
-si tienes `make` instalado). Ese comando descarga todas las fuentes del proyecto;
-la parte del INEGI requiere su propia clave de API.
+Hasta ahora el proyecto cubre la ingesta automatizada de las fuentes, su
+transformación a formato *tidy* y la validación de calidad de los datos. Todo se
+orquesta desde `rendimiento_bachoco/dataset.py`; cada fuente tiene su propio módulo
+en `rendimiento_bachoco/sources/` y las reglas de calidad viven en
+`rendimiento_bachoco/quality/`.
 
-Cuando existan los cinco archivos `data/raw/sniim_*_maiz_blanco.html`, transforma
-los precios del maíz blanco con:
+### Fuentes y APIs
 
-```bash
-uv run python rendimiento_bachoco/process_sniim.py
+| Fuente | Acceso | Qué se descarga | Salida cruda (`data/raw/`) |
+|---|---|---|---|
+| **Yahoo Finance** | Librería [`yfinance`](https://github.com/ranaroussi/yfinance) | Histórico diario completo (`period="max"`) de `GRUMAB.MX` y `MINSAB.MX`, ajustado por dividendos y splits | `RendimientoYahoo/<TICKER>.parquet` + `.txt` de metadatos |
+| **SNIIM** | `POST` a `economia-sniim.gob.mx/SNIIM-AN/estadisticas/anuariosgran1.asp` | Anuario de precios mensuales de maíz blanco (`OMABLAN`) en cinco mercados: Hermosillo (`260`), Culiacán (`250`), Guadalajara (`140`), Iztapalapa (`100`) y Guadalupe (`191`) | `sniim_<mercado>_maiz_blanco.html` + `.txt` de metadatos |
+| **INEGI** | [API de Indicadores](https://www.inegi.org.mx/servicios/api_indicadores.html) (BISE 2.0), requiere token | 19 indicadores del BISE; dos de ellos (`6207095692`, `6207095719`) se consultan por entidad federativa y el resto a nivel nacional | `INEGI/<indicador>/<área>.json` y `INEGI/METADATA/<indicador>.json` |
+| **DGSIAP** | Datos abiertos de `nube.agricultura.gob.mx` | Producción agrícola por estado y municipio, un archivo por año de 2018 a 2025, más el diccionario de datos | `DGSIAP/<año>.csv`, `DGSIAP/metadata.xlsx` |
+
+Cada descarga deja junto a los datos un archivo de metadatos o de log con la fecha
+de consulta, la URL y los parámetros usados, para poder rastrear el origen.
+
+Los tickers se configuran en `TICKERS_YAHOO` (`rendimiento_bachoco/config.py`); los
+mercados del SNIIM, los indicadores del INEGI y el rango de años de DGSIAP, en
+`rendimiento_bachoco/dataset.py`.
+
+### Cómo generar los datos
+
+1. Instala las dependencias (Python 3.12 y [uv](https://docs.astral.sh/uv/)); `uv`
+   crea el entorno virtual `.venv` si no existe:
+
+   ```bash
+   make requirements
+   ```
+
+2. Crea un archivo `.env` en la raíz del repositorio con tu token de la API del INEGI:
+
+   ```bash
+   INEGI_API_KEY=tu_token
+   ```
+
+3. Descarga, procesa y valida todas las fuentes:
+
+   ```bash
+   make data
+   ```
+
+   Equivale a `uv sync` seguido de `uv run python rendimiento_bachoco/dataset.py`,
+   así que no hace falta activar el entorno virtual.
+
+4. Transforma los precios del SNIIM a formato *tidy* (necesita los cinco HTML que
+   deja el paso anterior):
+
+   ```bash
+   make process_sniim
+   ```
+
+   Sin `make`: `uv run python rendimiento_bachoco/process_sniim.py`.
+
+Ambos comandos se ejecutan desde la raíz del repositorio. La carpeta `data/` no se
+versiona, así que hay que generarla en cada copia del proyecto.
+
+`make data` corre tres etapas en orden: descargas, procesamiento y validación. Si un
+paso falla (por ejemplo, el INEGI cuando falta el token), se registra el error y los
+demás pasos continúan; al final el comando lista los pasos fallidos y termina con
+código de salida 1.
+
+### Diagrama de la pipeline
+
+```mermaid
+flowchart LR
+    subgraph F["Fuentes"]
+        Y["Yahoo Finance<br/>yfinance"]
+        S["SNIIM<br/>HTTP POST"]
+        I["INEGI<br/>API de Indicadores"]
+        D["DGSIAP<br/>datos abiertos"]
+    end
+
+    subgraph R["data/raw"]
+        YR["RendimientoYahoo/*.parquet"]
+        SR["sniim_*_maiz_blanco.html"]
+        IR["INEGI/**/*.json"]
+        DR["DGSIAP/*.csv"]
+    end
+
+    subgraph T["Datos tidy"]
+        YT["data/interim/<br/>rendimiento_mensual.parquet"]
+        ST["data/processed/<br/>sniim_maiz_blanco_mensual.csv"]
+    end
+
+    VR{{"Calidad: esquema crudo<br/>pandera"}}
+    VM{{"Calidad: esquema mensual<br/>pandera"}}
+    VS{{"Calidad: fechas, duplicados<br/>y precios"}}
+    P["Procesamiento y validación<br/>pendientes"]
+
+    Y -->|make data| YR
+    S -->|make data| SR
+    I -->|make data| IR
+    D -->|make data| DR
+
+    YR -->|make data| YT
+    YR --> VR
+    YT --> VM
+
+    SR -->|make process_sniim| VS
+    VS --> ST
+
+    IR -.-> P
+    DR -.-> P
 ```
 
-Si tienes `make`, el comando equivalente es `make process_sniim`. El resultado es
-`data/processed/sniim_maiz_blanco_mensual.csv`: una fila por mes, mercado y origen
-del maíz, entre 2013 y 2025. Las celdas vacías conservan el precio como dato
-faltante. El script comprueba fechas, claves duplicadas y precios no positivos.
-Consulta `references/diccionario_sniim_maiz_blanco.md` para la descripción de
-cada columna.
+### Datos generados
+
+| Archivo | Granularidad | Contenido |
+|---|---|---|
+| `data/interim/rendimiento_mensual.parquet` | Una fila por mes, una columna por ticker | Rendimiento mensual `(cierre_t / cierre_{t-1}) - 1`, calculado con el último cierre de cada mes. Los meses sin operaciones quedan como `NaN`. |
+| `data/processed/sniim_maiz_blanco_mensual.csv` | Una fila por mes, mercado y origen del maíz (2013–2025) | Precio del maíz blanco en MXN/kg. Las celdas vacías se conservan como dato faltante, no como cero. Ver `references/diccionario_sniim_maiz_blanco.md`. |
+
+INEGI y DGSIAP por ahora solo se descargan en crudo; su transformación a formato
+*tidy* está pendiente.
+
+### Validación de la calidad de datos
+
+**Yahoo Finance** se valida con esquemas de [pandera](https://pandera.readthedocs.io/)
+(`rendimiento_bachoco/quality/yahoo.py`) como última etapa de `make data`:
+
+| Conjunto | Reglas |
+|---|---|
+| Crudo diario (un parquet por ticker) | `Open`, `High`, `Low` y `Close` numéricos y mayores que 0; `Volume` entero no negativo; `Dividends` y `Stock Splits` no negativos. Índice de fechas, sin duplicados y en orden creciente. Coherencia entre precios: `High >= Low`, `High >= Open` y `Low <= Open`. |
+| Rendimiento mensual | Exactamente una columna por ticker configurado, sin columnas extra. Rendimientos mayores que -1 (se permiten faltantes). Índice de fechas, sin duplicados y en orden creciente. Ninguna columna completamente vacía. |
+
+Que `Close` quede dentro de `[Low, High]` se reporta como advertencia y no como
+error, porque en días ex-dividendo yfinance ajusta el cierre con un factor distinto
+al de los demás precios.
+
+**SNIIM** se valida en dos momentos:
+
+- Al descargar (`sources/sniim.py`): la respuesta debe contener el nombre del mercado
+  y el año 2013; de lo contrario se descarta por no ser la tabla esperada.
+- Al procesar (`process_sniim.py`): todas las fechas deben ser válidas y estar entre
+  2013 y 2025, la combinación de fecha, mercado y origen no puede repetirse, y los
+  precios presentes deben ser mayores que 0. Si alguna regla falla, no se escribe
+  el CSV.
+
+**INEGI** y **DGSIAP** todavía no tienen reglas de calidad; solo se registra un log
+de cada descarga.
 
 ## Project Organization
 
@@ -108,7 +232,18 @@ cada columna.
     │
     ├── config.py               <- Store useful variables and configuration
     │
-    ├── dataset.py              <- Scripts to download or generate data
+    ├── dataset.py              <- Orchestrates download, processing and validation (`make data`)
+    │
+    ├── process_sniim.py        <- Turns the raw SNIIM HTML into a tidy monthly CSV
+    │
+    ├── sources                 <- One download module per data source
+    │   ├── dgsiap.py
+    │   ├── inegi.py
+    │   ├── sniim.py
+    │   └── yahoo.py
+    │
+    ├── quality                 <- Data quality rules
+    │   └── yahoo.py            <- pandera schemas for the Yahoo Finance data
     │
     ├── features.py             <- Code to create features for modeling
     │
