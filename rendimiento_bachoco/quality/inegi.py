@@ -31,7 +31,7 @@ inegi_raw_schema = DataFrameSchema(
     checks = [
         Check(
             lambda df : df.index.is_unique,
-            error = 'Index not unique.'
+            error = 'Índice no es único.'
         )
     ],
     strict = False
