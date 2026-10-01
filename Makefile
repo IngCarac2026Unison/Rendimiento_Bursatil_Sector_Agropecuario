@@ -61,7 +61,7 @@ create_environment:
 ## Make dataset
 .PHONY: data
 data: requirements
-	$(PYTHON_INTERPRETER) rendimiento_bachoco/dataset.py
+	uv run python rendimiento_bachoco/dataset.py
 
 
 ## Transform SNIIM raw HTML into a tidy monthly CSV
