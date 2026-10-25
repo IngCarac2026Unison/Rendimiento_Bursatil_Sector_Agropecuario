@@ -51,5 +51,6 @@ dev = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
     "regex>=2026.9.10",
+    "seaborn>=0.13.2",
 ]
 
