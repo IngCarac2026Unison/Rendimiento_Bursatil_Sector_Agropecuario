@@ -51,6 +51,9 @@ dev = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
     "regex>=2026.9.10",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
     "seaborn>=0.13.2",
+    "skrub>=0.11.0",
 ]
 
