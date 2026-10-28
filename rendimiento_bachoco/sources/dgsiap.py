@@ -34,6 +34,10 @@ def process_dgsiap(raw_dir: Path,
         dgsiap_df['Sembrada'] = dgsiap_df['Sembrada'].astype(str).str.replace(',', '', regex=True).astype(float) 
         dgsiap_df['Volumenproduccion'] = dgsiap_df['Volumenproduccion'].astype(str).str.replace(',', '', regex=True).astype(float) 
 
+        nomCultCol = 'Nomcultivo' if 'Nomcultivo' in dgsiap_df.columns else 'Nomcultivo Sin Um'
+        dgsiap_df = dgsiap_df.loc[dgsiap_df[nomCultCol].isin(['Maíz grano', 'Maíz forrajero en verde', 'Trigo forrajero verde', 'Trigo grano', \
+            'Arroz palay', 'Avena forrajera en verde', 'Avena grano', 'Semilla de avena grano', 'Avena forrajera achicalada', 'Avena forrajera seca'])] # Granos que produce GRUMA: Maíz, trigo, arroz, avena.
+
         dgsiap_df.to_csv(tidy_dir / f'{year}.csv')
 
     logger.success("Datos DGISAP procesados.")

@@ -16,6 +16,7 @@ PYTHON_INTERPRETER = python
 requirements:
 	uv sync
 	uv add --dev regex
+	uv add --dev seaborn
 	
 
 
