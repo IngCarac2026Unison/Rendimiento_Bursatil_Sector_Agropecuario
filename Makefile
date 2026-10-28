@@ -51,6 +51,10 @@ create_environment:
 	@echo ">>> New uv virtual environment created. Activate with:"
 	@echo ">>> Windows: .\\\\.venv\\\\Scripts\\\\activate"
 	@echo ">>> Unix/macOS: source ./.venv/bin/activate"
+
+.PHONY: run_env
+run_env:
+	source ./.venv/bin/activate
 	
 ## Create a jupyter kernel for data exploration
 .PHONY: kernel
