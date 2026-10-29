@@ -17,6 +17,7 @@ requirements:
 	uv sync
 	uv add --dev regex
 	uv add --dev seaborn
+	uv add --dev sweetviz
 	
 
 
