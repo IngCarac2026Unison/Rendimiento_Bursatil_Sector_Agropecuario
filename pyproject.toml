@@ -46,10 +46,14 @@ extend-select = ["I"]  # Add import sorting
 known-first-party = ["rendimiento_bachoco"]
 force-sort-within-sections = true
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [dependency-groups]
 dev = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
+    "pytest>=9.2.0",
     "regex>=2026.9.10",
     "seaborn>=0.13.2",
     "sweetviz>=2.3.3",
