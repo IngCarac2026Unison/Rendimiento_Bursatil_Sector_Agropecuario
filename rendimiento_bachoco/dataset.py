@@ -8,7 +8,7 @@ from rendimiento_bachoco.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR, RAW
 from rendimiento_bachoco.quality.yahoo import validate_finance_monthly, validate_finance_raw
 from rendimiento_bachoco.quality.inegi import validate_inegi
 from rendimiento_bachoco.quality.dgsiap import validate_dgsiap
-from rendimiento_bachoco.sources.dgsiap import download_dgsiap, process_dgsiap
+from rendimiento_bachoco.sources.dgsiap import download_dgsiap, process_dgsiap, process_dgsiap_metadata
 from rendimiento_bachoco.sources.inegi import download_inegi_data, process_inegi_data
 from rendimiento_bachoco.sources.sniim import download_sniim_data
 from rendimiento_bachoco.sources.yahoo import download_finance_data, process_finance_data
@@ -66,13 +66,13 @@ def main() -> None:
             market_name="Guadalupe",
         ),
         "INEGI-Indicators": lambda: download_inegi_data(
-            RAW_DATA_DIR,
-            INDICATORS_INEGI
+            data_root = RAW_DATA_DIR,
+            indicators = INDICATORS_INEGI
         ),
         "DGSIAP": lambda: download_dgsiap(
-            RAW_DATA_DIR / "DGSIAP",
-            DGSIAP_START_YEAR,
-            DGSIAP_END_YEAR
+            output_path = RAW_DATA_DIR / "DGSIAP",
+            start_year = DGSIAP_START_YEAR,
+            end_year = DGSIAP_END_YEAR
         )
     }
 
@@ -87,6 +87,10 @@ def main() -> None:
             indicators = INDICATORS_INEGI
         ),
         "DGSIAP" : lambda : process_dgsiap(
+            raw_dir = RAW_DATA_DIR / 'DGSIAP',
+            tidy_dir = INTERIM_DATA_DIR / 'DGSIAP'
+        ),
+        "DGSIAP metadata" : lambda : process_dgsiap_metadata(
             raw_dir = RAW_DATA_DIR / 'DGSIAP',
             tidy_dir = INTERIM_DATA_DIR / 'DGSIAP'
         )
@@ -109,8 +113,8 @@ def main() -> None:
             meta = False
         ),
         "Datos DGSIAP (tidy)" : lambda : validate_dgsiap(
-            INTERIM_DATA_DIR / "DGSIAP",
-            REFERENCES_DIR / 'dgsiap_metadata.csv'
+            raw_dir = INTERIM_DATA_DIR / "DGSIAP",
+            meta_filepath = INTERIM_DATA_DIR / 'DGSIAP' / 'dgsiap_metadata.csv'
         )
     }
 
