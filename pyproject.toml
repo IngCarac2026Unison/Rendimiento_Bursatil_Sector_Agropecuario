@@ -30,6 +30,7 @@ dependencies = [
     "arrow>=1.4.0",
     "pyarrow>=25.0.1",
     "pandera[pandas]>=0.20.0",
+    "scikit-learn>=1.9.1",
 ]
 requires-python = "~=3.12.0"
 
