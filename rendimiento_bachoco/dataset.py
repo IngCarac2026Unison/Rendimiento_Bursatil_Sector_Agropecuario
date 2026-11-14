@@ -18,6 +18,7 @@ from rendimiento_bachoco.quality.inegi import validate_inegi
 from rendimiento_bachoco.quality.conasami import validate_conasami
 from rendimiento_bachoco.quality.dgsiap import validate_dgsiap
 from rendimiento_bachoco.quality.enigh import validate_enigh
+from rendimiento_bachoco.quality.inpc import validate_inpc
 from rendimiento_bachoco.quality.profeco import validate_profeco
 from rendimiento_bachoco.sources.conasami import download_conasami, process_conasami
 from rendimiento_bachoco.sources.dgsiap import (
@@ -39,11 +40,14 @@ from rendimiento_bachoco.sources.profeco import (
     process_profeco,
 )
 from rendimiento_bachoco.sources.inegi import download_inegi_data, process_inegi_data
+from rendimiento_bachoco.sources.inpc import INPC_INDICADORES, download_inpc, process_inpc
 from rendimiento_bachoco.sources.sniim import download_sniim_data
 from rendimiento_bachoco.sources.yahoo import download_finance_data, process_finance_data
 
 CONASAMI_RAW_PATH = RAW_DATA_DIR / "CONASAMI" / "salarios_minimos_2009_2026.xlsx"
 CONASAMI_PROCESSED_PATH = PROCESSED_DATA_DIR / "salario_minimo_mensual.csv"
+INPC_RAW_DIR = RAW_DATA_DIR / "INEGI" / "INPC"
+INPC_PROCESSED_PATH = PROCESSED_DATA_DIR / "inpc_mensual.csv"
 
 app = typer.Typer()
 
@@ -64,7 +68,7 @@ def _run_steps(steps: dict[str, Callable[[], None]], description: str) -> list[s
 def main(
     only: Annotated[
         str | None,
-        typer.Option(help="Corre solo los pasos de una fuente (p. ej. CONASAMI, PROFECO, ENIGH)."),
+        typer.Option(help="Corre solo los pasos de una fuente (p. ej. CONASAMI, PROFECO, ENIGH, INPC)."),
     ] = None,
 ) -> None:
 
@@ -112,6 +116,7 @@ def main(
         "CONASAMI": lambda: download_conasami(CONASAMI_RAW_PATH),
         "PROFECO": lambda: download_profeco(PROFECO_RAW_DIR),
         "ENIGH": lambda: download_enigh(ENIGH_RAW_DIR),
+        "INPC": lambda: download_inpc(INPC_RAW_DIR, INPC_INDICADORES),
     }
 
     # SNIIM se procesa aparte en rendimiento_bachoco/process_sniim.py (ver README).
@@ -135,6 +140,7 @@ def main(
             PROFECO_RAW_DIR, PROFECO_PROCESSED_PATH.parent, PROFECO_INTERIM_PATH
         ),
         "ENIGH": lambda: process_enigh(ENIGH_RAW_DIR, ENIGH_PROCESSED_PATH),
+        "INPC": lambda: process_inpc(INPC_RAW_DIR, INPC_PROCESSED_PATH),
     }
 
     # Solo la fuente financiera tiene validación de calidad por ahora.
@@ -158,6 +164,7 @@ def main(
         "CONASAMI (tidy)": lambda: validate_conasami(CONASAMI_PROCESSED_PATH),
         "PROFECO (tidy)": lambda: validate_profeco(PROFECO_PROCESSED_PATH),
         "ENIGH (tidy)": lambda: validate_enigh(ENIGH_PROCESSED_PATH),
+        "INPC (tidy)": lambda: validate_inpc(INPC_PROCESSED_PATH),
     }
 
     if only:

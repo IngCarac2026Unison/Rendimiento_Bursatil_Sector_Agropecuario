@@ -96,6 +96,12 @@ data_enigh:
 	uv run python rendimiento_bachoco/dataset.py --only enigh
 
 
+## Download, process and validate INEGI INPC (índice general)
+.PHONY: data_inpc
+data_inpc:
+	uv run python rendimiento_bachoco/dataset.py --only inpc
+
+
 ## Transform SNIIM raw HTML into a tidy monthly CSV
 .PHONY: process_sniim
 process_sniim:

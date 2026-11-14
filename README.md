@@ -60,6 +60,7 @@ Adicionalmente se analizan una variedad de indicadores de la base de datos abier
 - **CONASAMI:** salario mínimo general por mes y zona (2013–2025). Salida: `data/processed/salario_minimo_mensual.csv`; diccionario en `references/diccionario_salario_minimo.md`.
 - **PROFECO (Quién es quién en los precios):** precio mensual de la tortilla de maíz por estado y giro (2015–2026). Salida: `data/processed/precio_tortilla_mensual.csv`; diccionario en `references/diccionario_precio_tortilla.md`.
 - **ENIGH (INEGI):** consumo y gasto en tortilla por hogar (2014–2024, bienal). Salida: `data/processed/enigh_tortilla_hogar.csv`; diccionario en `references/diccionario_enigh_tortilla.md`.
+- **INPC (INEGI):** índice nacional de precios al consumidor mensual, serie general (2013 a la fecha; requiere `INEGI_API_KEY`). Salida: `data/processed/inpc_mensual.csv`; diccionario en `references/diccionario_inpc.md`. Se descarga con `make data_inpc`.
 
 ## Tipos de datos
 
