@@ -29,5 +29,5 @@ Rutas relativas a la raíz del repositorio (`../`). Estado: **listo**, **en curs
 | Requisito | Estado | Dónde |
 |---|---|---|
 | Borrador de historias | Listo | [`reports/historia/`](../reports/historia/borrador_historias.md) |
-| Historia 1: ¿Quién paga el maíz caro? | Listo | [html](fase3/historia1.html); libreta [`05-mg-cadena-maiz-tortilla`](../notebooks/05-mg-cadena-maiz-tortilla.ipynb); figuras con `make historia1` ([`historia1.py`](../rendimiento_bachoco/historia1.py), [`plots.py`](../rendimiento_bachoco/plots.py)) en [`reports/figures/`](../reports/figures/) |
+| Historia 1: ¿Quién paga el maíz caro? | Listo | [html](fase3/historia1.html); libretas [`05-mg-cadena-maiz-tortilla`](../notebooks/05-mg-cadena-maiz-tortilla.ipynb), [`06-mg-eda-inpc`](../notebooks/06-mg-eda-inpc.ipynb) y [`07-mg-cruce-inpc-cadena`](../notebooks/07-mg-cruce-inpc-cadena.ipynb); figuras con `make historia1` ([`historia1.py`](../rendimiento_bachoco/historia1.py), [`plots.py`](../rendimiento_bachoco/plots.py)) en [`reports/figures/`](../reports/figures/) |
 | Presentación de la historia 1 | Listo | [html](fase3/historia1_presentacion.html), [guion](fase3/guion_historia1.md) |
