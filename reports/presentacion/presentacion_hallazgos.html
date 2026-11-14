@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Gruma y el maíz: hallazgos</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root { --azul: #12355b; --maiz: #e8a33d; --texto: #1f2328; --tenue: #57606a; --fondo-suave: #f3f6fa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Helvetica Neue", Arial, sans-serif; color: var(--texto); }
+  .slide { width: 1280px; height: 720px; padding: 56px 64px; position: relative; overflow: hidden; page-break-after: always; background: #fff; }
+  .oscura { background: var(--azul); color: #fff; }
+  h1 { font-size: 40px; margin: 0 0 18px; line-height: 1.15; color: var(--azul); }
+  .oscura h1 { color: #fff; }
+  p, li { font-size: 19px; line-height: 1.45; }
+  .tenue { color: var(--tenue); }
+  .num { position: absolute; right: 40px; bottom: 26px; font-size: 13px; color: var(--tenue); }
+  .oscura .num { color: #b9c6d6; }
+  .etiqueta { display: inline-block; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--maiz); font-weight: 700; margin-bottom: 12px; }
+  /* portada */
+  .portada h1 { font-size: 50px; max-width: 980px; margin-top: 70px; }
+  .pregunta { font-size: 23px; max-width: 980px; color: #dce5f0; margin: 8px 0 54px; }
+  .equipo { display: flex; gap: 48px; }
+  .equipo div { font-size: 17px; color: #dce5f0; }
+  .equipo b { display: block; color: #fff; font-size: 19px; margin-bottom: 2px; }
+  .fuentes { position: absolute; left: 64px; bottom: 56px; display: flex; gap: 14px; }
+  .chip { border: 1px solid #5a7697; border-radius: 999px; padding: 6px 16px; font-size: 15px; color: #dce5f0; }
+  /* diapositiva 2 */
+  .dos-col { display: grid; grid-template-columns: 330px 1fr; gap: 40px; align-items: center; height: 520px; }
+  .stat { font-size: 84px; font-weight: 800; color: var(--azul); line-height: 1; }
+  .stat-label { font-size: 18px; color: var(--tenue); margin: 6px 0 26px; }
+  .img-marco { background: var(--fondo-suave); border-radius: 18px; padding: 18px; }
+  .img-marco img { width: 100%; display: block; }
+  /* diapositiva 3 */
+  .tres { display: grid; grid-template-columns: 1fr 340px; gap: 32px; }
+  .tarjeta { background: var(--fondo-suave); border-radius: 16px; padding: 16px 20px; margin-bottom: 14px; }
+  .tarjeta b { display: block; font-size: 19px; color: var(--azul); margin-bottom: 4px; }
+  .tarjeta span { font-size: 16px; line-height: 1.4; color: var(--texto); }
+  .tarjeta.destacada { background: #fdf1dc; }
+  /* diapositiva 4 */
+  .cuatro { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 64px; align-items: start; }
+  .cuatro p, .cuatro li { font-size: 21px; }
+  .grande { font-size: 76px; margin-bottom: 18px; font-weight: 800; color: var(--maiz); line-height: 1; }
+  .oscura p, .oscura li { color: #dce5f0; }
+  .oscura ul { padding-left: 22px; margin: 6px 0; }
+  .oscura li { margin-bottom: 10px; }
+  .caja { border: 1px solid #5a7697; border-radius: 16px; padding: 22px 26px; }
+</style>
+</head>
+<body>
+
+<!-- 1. Portada -->
+<section class="slide oscura portada">
+  <span class="etiqueta">Ingeniería de Características · EDA</span>
+  <h1>¿El precio del maíz mueve la acción de Gruma?</h1>
+  <p class="pregunta">Variaciones del precio regional del maíz blanco en México y rendimientos mensuales de GRUMAB.MX, 2013–2025</p>
+  <div class="equipo">
+    <div><b>Manuel Gortarez</b>manuel_gortarez64@outlook.com</div>
+    <div><b>Marco Ramonet</b>es.ramonet@gmail.com</div>
+    <div><b>Oscar Sandoval</b>oscarsandovalrobles05@gmail.com</div>
+  </div>
+  <div class="fuentes">
+    <span class="chip">SNIIM · 5 centrales de abasto</span>
+    <span class="chip">DGSIAP · producción anual</span>
+    <span class="chip">Yahoo Finance · GRUMAB.MX</span>
+  </div>
+  <span class="num">1 / 4</span>
+</section>
+
+<!-- 2. Hallazgo principal -->
+<section class="slide">
+  <span class="etiqueta">Hallazgo principal</span>
+  <h1>Mes a mes, el maíz no explica el rendimiento de Gruma</h1>
+  <div class="dos-col">
+    <div>
+      <div class="stat">≤ 0.14</div>
+      <div class="stat-label">correlación máxima entre el cambio del maíz y el rendimiento de Gruma, en los 5 mercados</div>
+      <p>Se mantiene al quitar extremos, separar por periodos y probar rezagos de 1 a 3 meses: <b>ninguna es significativa</b>.</p>
+      <p class="tenue" style="font-size:16px">El precio del maíz es muy local: hasta los mercados entre sí se correlacionan poco (máx. 0.30).</p>
+    </div>
+    <div class="img-marco"><img src="../figures/cruce_sniim_bolsa_correlaciones.png" alt="Mapa de calor de correlaciones por mercado para Gruma y Minsa"></div>
+  </div>
+  <span class="num">2 / 4</span>
+</section>
+
+<!-- 3. Eventos -->
+<section class="slide">
+  <span class="etiqueta">Línea de tiempo 2013–2025</span>
+  <h1>Los grandes eventos mueven al maíz, no a Gruma</h1>
+  <div class="tres">
+    <div class="img-marco" style="padding:12px"><img src="../figures/cruce_eventos_gruma_maiz.png" alt="Gruma y precio del maíz indexados con eventos marcados"></div>
+    <div>
+      <div class="tarjeta destacada"><b>Ucrania, feb-2022</b><span>Único evento con las dos series fuera de lo normal: maíz +16 %, Gruma −15 % en 3 meses.</span></div>
+      <div class="tarjeta"><b>Comercio y tipo de cambio</b><span>TLCAN (−12 %), COVID (+37 %) y aranceles de EU (−13 %) movieron a Gruma sin mover al maíz. ~55 % de sus ventas son en EU.</span></div>
+      <div class="tarjeta"><b>Regulación sin huella</b><span>Decretos sobre transgénicos y el panel del T-MEC no cambian ninguna serie.</span></div>
+    </div>
+  </div>
+  <span class="num">3 / 4</span>
+</section>
+
+<!-- 4. Producción y conclusiones -->
+<section class="slide oscura">
+  <span class="etiqueta">Producción y siguientes pasos</span>
+  <h1>Menos cosecha no significó maíz más caro</h1>
+  <div class="cuatro">
+    <div>
+      <div class="grande">6.7 → 2.3 Mt</div>
+      <p>Producción de maíz en Sinaloa, 2023 a 2025, por la sequía (DGSIAP). Aun así el precio bajó: el faltante se cubrió con importaciones.</p>
+      <p>El precio al productor (DGSIAP) y el mayorista (SNIIM) se mueven juntos (ρ = 0.76): las fuentes coinciden.</p>
+    </div>
+    <div class="caja">
+      <p style="margin-top:0"><b style="color:#fff">Conclusión:</b> el precio regional del maíz no es una buena señal de Gruma; pesan más el mercado, el comercio con EU y el tipo de cambio.</p>
+      <p style="margin-bottom:4px"><b style="color:#fff">Para el modelado:</b></p>
+      <ul>
+        <li>Tipo de cambio e indicadores del INEGI</li>
+        <li>Precio internacional del maíz (Chicago)</li>
+        <li>Ciclos agrícolas OI / PV</li>
+      </ul>
+    </div>
+  </div>
+  <span class="num">4 / 4</span>
+</section>
+
+</body>
+</html>

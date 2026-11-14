@@ -78,6 +78,30 @@ data: requirements
 	uv run python rendimiento_bachoco/dataset.py
 
 
+## Download, process and validate CONASAMI minimum wage
+.PHONY: data_conasami
+data_conasami:
+	uv run python rendimiento_bachoco/dataset.py --only conasami
+
+
+## Download, process and validate PROFECO tortilla prices (~7 min)
+.PHONY: data_profeco
+data_profeco:
+	uv run python rendimiento_bachoco/dataset.py --only profeco
+
+
+## Download, process and validate ENIGH tortilla spending
+.PHONY: data_enigh
+data_enigh:
+	uv run python rendimiento_bachoco/dataset.py --only enigh
+
+
+## Download, process and validate INEGI INPC (índice general)
+.PHONY: data_inpc
+data_inpc:
+	uv run python rendimiento_bachoco/dataset.py --only inpc
+
+
 ## Transform SNIIM raw HTML into a tidy monthly CSV
 .PHONY: process_sniim
 process_sniim:
@@ -101,3 +125,8 @@ export PRINT_HELP_PYSCRIPT
 
 help:
 	@$(PYTHON_INTERPRETER) -c "${PRINT_HELP_PYSCRIPT}" < $(MAKEFILE_LIST)
+
+## Regenera las figuras de la historia de datos 1
+.PHONY: historia1
+historia1:
+	uv run python -m rendimiento_bachoco.historia1

@@ -18,6 +18,14 @@ Los precios del maíz representan variacioens temporales y regionales entre los 
 
 Esta investigación tiene un alcance descriptivo y exploratorio, por lo cual los hallazgos no se interpretaran como causales.
 
+## Público destinatario
+
+El producto de datos final (tablero e historias de datos) está pensado para:
+
+- **Analistas e inversionistas del sector agroalimentario**, que quieren saber si el costo del maíz es una señal útil para el comportamiento de una empresa como Gruma en la bolsa.
+- **Periodistas y público general interesado en el precio de la tortilla**, que siguen cómo el precio del maíz se traslada a lo largo de la cadena, del campo al consumidor.
+- **Estudiantes e investigadores** que buscan un ejemplo reproducible de integración de series de tiempo, datos geográficos y datos de mercado.
+
 ## Fuentes de datos preliminares
 
 ### Bolsa Mexicana de Valores y Yahoo Finance
@@ -47,6 +55,13 @@ Adicionalmente se analizan una variedad de indicadores de la base de datos abier
 
 - https://www.inegi.org.mx/servicios/api_indicadores.html
 
+### Fuentes complementarias: CONASAMI, PROFECO y ENIGH
+
+- **CONASAMI:** salario mínimo general por mes y zona (2013–2025). Salida: `data/processed/salario_minimo_mensual.csv`; diccionario en `references/diccionario_salario_minimo.md`.
+- **PROFECO (Quién es quién en los precios):** precio mensual de la tortilla de maíz por estado y giro (2015–2026). Salida: `data/processed/precio_tortilla_mensual.csv`; diccionario en `references/diccionario_precio_tortilla.md`.
+- **ENIGH (INEGI):** consumo y gasto en tortilla por hogar (2014–2024, bienal). Salida: `data/processed/enigh_tortilla_hogar.csv`; diccionario en `references/diccionario_enigh_tortilla.md`.
+- **INPC (INEGI):** índice nacional de precios al consumidor mensual, serie general (2013 a la fecha; requiere `INEGI_API_KEY`). Salida: `data/processed/inpc_mensual.csv`; diccionario en `references/diccionario_inpc.md`. Se descarga con `make data_inpc`.
+
 ## Tipos de datos
 
 - **Series de tiempo:** precios de la acción y precios del maíz.
@@ -69,7 +84,7 @@ en `rendimiento_bachoco/sources/` y las reglas de calidad viven en
 | **Yahoo Finance** | Librería [`yfinance`](https://github.com/ranaroussi/yfinance) | Histórico diario completo (`period="max"`) de `GRUMAB.MX` y `MINSAB.MX`, ajustado por dividendos y splits | `RendimientoYahoo/<TICKER>.parquet` + `.txt` de metadatos |
 | **SNIIM** | `POST` a `economia-sniim.gob.mx/SNIIM-AN/estadisticas/anuariosgran1.asp` | Anuario de precios mensuales de maíz blanco (`OMABLAN`) en cinco mercados: Hermosillo (`260`), Culiacán (`250`), Guadalajara (`140`), Iztapalapa (`100`) y Guadalupe (`191`) | `sniim_<mercado>_maiz_blanco.html` + `.txt` de metadatos |
 | **INEGI** | [API de Indicadores](https://www.inegi.org.mx/servicios/api_indicadores.html) (BISE 2.0), requiere token | 19 indicadores del BISE; dos de ellos (`6207095692`, `6207095719`) se consultan por entidad federativa y el resto a nivel nacional | `INEGI/<indicador>/<área>.json` y `INEGI/METADATA/<indicador>.json` |
-| **DGSIAP** | Datos abiertos de `nube.agricultura.gob.mx` | Producción agrícola por estado y municipio, un archivo por año de 2018 a 2025, más el diccionario de datos | `DGSIAP/<año>.csv`, `DGSIAP/metadata.xlsx` |
+| **DGSIAP** | Datos abiertos de `nube.agricultura.gob.mx` | Producción agrícola por estado y municipio, un archivo por año (2018–2025 en los datos descargados; `DGSIAP_START_YEAR` en `config.py` está en 2013), más el diccionario de datos | `DGSIAP/<año>.csv`, `DGSIAP/metadata.xlsx` |
 
 Cada descarga deja junto a los datos un archivo de metadatos o de log con la fecha
 de consulta, la URL y los parámetros usados, para poder rastrear el origen.
@@ -111,7 +126,18 @@ mercados del SNIIM, los indicadores del INEGI y el rango de años de DGSIAP, en
 
    Sin `make`: `uv run python rendimiento_bachoco/process_sniim.py`.
 
-Ambos comandos se ejecutan desde la raíz del repositorio. La carpeta `data/` no se
+5. Opcional: corre una sola de las fuentes nuevas (descarga, procesa y valida;
+   `make data` ya las incluye):
+
+   ```bash
+   make data_conasami
+   make data_profeco   # reprocesa los RAR, ~7 min
+   make data_enigh
+   ```
+
+   Equivalen a `uv run python rendimiento_bachoco/dataset.py --only <fuente>`.
+
+Todos los comandos se ejecutan desde la raíz del repositorio. La carpeta `data/` no se
 versiona, así que hay que generarla en cada copia del proyecto.
 
 `make data` corre tres etapas en orden: descargas, procesamiento y validación. Si un
@@ -145,7 +171,8 @@ flowchart LR
     VR{{"Calidad: esquema crudo<br/>pandera"}}
     VM{{"Calidad: esquema mensual<br/>pandera"}}
     VS{{"Calidad: fechas, duplicados<br/>y precios"}}
-    P["Procesamiento y validación<br/>pendientes"]
+    VD{{"Calidad: esquema DGSIAP<br/>pandera"}}
+    P["Procesamiento INEGI<br/>pendiente"]
 
     Y -->|make data| YR
     S -->|make data| SR
@@ -160,7 +187,8 @@ flowchart LR
     VS --> ST
 
     IR -.-> P
-    DR -.-> P
+    DR -->|make data| DT["data/interim/DGSIAP/*.csv"]
+    DT --> VD
 ```
 
 ### Datos generados
@@ -170,8 +198,11 @@ flowchart LR
 | `data/interim/rendimiento_mensual.parquet` | Una fila por mes, una columna por ticker | Rendimiento mensual `(cierre_t / cierre_{t-1}) - 1`, calculado con el último cierre de cada mes. Los meses sin operaciones quedan como `NaN`. |
 | `data/processed/sniim_maiz_blanco_mensual.csv` | Una fila por mes, mercado y origen del maíz (2013–2025) | Precio del maíz blanco en MXN/kg. Las celdas vacías se conservan como dato faltante, no como cero. Ver `references/diccionario_sniim_maiz_blanco.md`. |
 
-INEGI y DGSIAP por ahora solo se descargan en crudo; su transformación a formato
-*tidy* está pendiente.
+DGSIAP se filtra a los cultivos relacionados con Gruma (maíz, trigo, arroz y avena)
+y se guarda por año en `data/interim/DGSIAP/`; ver `references/diccionario_dgsiap.md`.
+El diccionario del rendimiento mensual está en
+`references/diccionario_rendimiento_mensual.md`. La transformación de INEGI a
+formato *tidy* está pendiente.
 
 ### Validación de la calidad de datos
 
@@ -196,8 +227,13 @@ al de los demás precios.
   precios presentes deben ser mayores que 0. Si alguna regla falla, no se escribe
   el CSV.
 
-**INEGI** y **DGSIAP** todavía no tienen reglas de calidad; solo se registra un log
-de cada descarga.
+**DGSIAP** se valida con un esquema de pandera (`rendimiento_bachoco/quality/dgsiap.py`)
+construido a partir de los metadatos oficiales: tipos de cada campo, tolerancia a los
+nombres de columna que cambian entre años (`Nomcultivo`, `Precio`) e índice único.
+`Rendimiento` y `Precio` admiten faltantes, que aparecen en 2024 y 2025.
+
+**INEGI** tiene su propia validación en `rendimiento_bachoco/quality/inegi.py`; de cada
+descarga se registra además un log.
 
 ## Project Organization
 
