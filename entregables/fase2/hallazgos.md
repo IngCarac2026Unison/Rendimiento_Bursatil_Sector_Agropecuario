@@ -8,8 +8,8 @@ lang: es
 | Integrante | Correo | GitHub |
 |---|---|---|
 | Manuel Eduardo Gortarez Blanco | manuel_gortarez64@outlook.com | [Mgb64](https://github.com/Mgb64) |
-| Marco Ramonet | es.ramonet@gmail.com | [marcoramonet](https://github.com/marcoramonet) |
-| Oscar Sandoval | oscarsandovalrobles05@gmail.com | [gamasand](https://github.com/gamasand) |
+| Marco Antonio Ramonet Moreno | es.ramonet@gmail.com | [marcoramonet](https://github.com/marcoramonet) |
+| Oscar Gamaliel Sandoval Robles | oscarsandovalrobles05@gmail.com | [gamasand](https://github.com/gamasand) |
 
 ## Resumen
 
